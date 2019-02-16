@@ -240,6 +240,12 @@ def configure_clp_pex_resolution(parser, builder):
       help=('Whether to allow resolution of manylinux dists for linux target '
             'platforms; Default: allow manylinux'))
 
+  group.add_option(
+    '--python-version',
+    dest='python_version',
+    default=None,
+    help="Only use wheels compatible with Python interpreter version <version>")
+
   # Set the pex tool to fetch from PyPI by default if nothing is specified.
   parser.set_default('repos', [PyPIFetcher()])
   parser.add_option_group(group)

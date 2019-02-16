@@ -215,15 +215,17 @@ Calculated platform: {calculated_platform!r}""".format(
         # platform.
         return expand_platform()
 
-  def __init__(self, allow_prereleases=None, interpreter=None, platform=None, use_manylinux=None):
+  def __init__(self, allow_prereleases=None, interpreter=None, platform=None, versions=None, use_manylinux=None):
     self._interpreter = interpreter or PythonInterpreter.get()
     self._platform = self._maybe_expand_platform(self._interpreter, platform)
+    self._versions = versions
     self._allow_prereleases = allow_prereleases
     platform_name = self._platform.platform
     self._target_interpreter_env = self._interpreter.identity.pkg_resources_env(platform_name)
     self._supported_tags = self._platform.supported_tags(
       self._interpreter,
-      use_manylinux
+      use_manylinux,
+      versions=self._versions,
     )
     TRACER.log(
       'R: tags for %r x %r -> %s' % (self._platform, self._interpreter, self._supported_tags),
@@ -405,6 +407,7 @@ def platform_to_tags(platform, interpreter):
 def resolve(requirements,
             fetchers=None,
             interpreter=None,
+            versions=None,
             platform=None,
             context=None,
             precedence=None,
@@ -491,11 +494,13 @@ def resolve(requirements,
                                allow_prereleases=allow_prereleases,
                                use_manylinux=use_manylinux,
                                interpreter=interpreter,
+                               versions=versions,
                                platform=platform)
   else:
     resolver = Resolver(allow_prereleases=allow_prereleases,
                         use_manylinux=use_manylinux,
                         interpreter=interpreter,
+                        versions=versions,
                         platform=platform)
 
   return resolver.resolve(resolvables_from_iterable(requirements, builder, interpreter=interpreter))
@@ -504,6 +509,7 @@ def resolve(requirements,
 def resolve_multi(requirements,
                   fetchers=None,
                   interpreters=None,
+                  versions=None,
                   platforms=None,
                   context=None,
                   precedence=None,
@@ -556,6 +562,7 @@ def resolve_multi(requirements,
       for resolvable in resolve(requirements,
                                 fetchers,
                                 interpreter,
+                                versions,
                                 platform,
                                 context,
                                 precedence,
@@ -563,6 +570,7 @@ def resolve_multi(requirements,
                                 cache_ttl,
                                 allow_prereleases,
                                 use_manylinux=use_manylinux):
+        # print("resolved: {}".format(resolvable))
         if resolvable not in seen:
           seen.add(resolvable)
           yield resolvable

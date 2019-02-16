@@ -67,7 +67,7 @@ class Platform(namedtuple('Platform', ['platform', 'impl', 'version', 'abi'])):
   def is_extended(self):
     return all(attr is not None for attr in (self.impl, self.version, self.abi))
 
-  def supported_tags(self, interpreter=None, force_manylinux=True):
+  def supported_tags(self, interpreter=None, force_manylinux=True, versions=None):
     """Returns a list of supported PEP425 tags for the current platform."""
     if interpreter and not self.is_extended:
       # N.B. If we don't get an extended platform specifier, we generate
@@ -83,7 +83,7 @@ class Platform(namedtuple('Platform', ['platform', 'impl', 'version', 'abi'])):
       tags = get_supported(
         platform=self.platform,
         impl=self.impl,
-        version=self.version,
+        version=versions,
         abi=self.abi,
         force_manylinux=force_manylinux
       )
